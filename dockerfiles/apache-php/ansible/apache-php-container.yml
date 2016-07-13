@@ -1,0 +1,17 @@
+- name: Install Apache and PHP
+  hosts: all
+  tasks:
+    - name: Install apt packages
+      apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+      with_items:
+        - apache2
+        - php5
+        - libapache2-mod-php5
+        - php5-mcrypt
+
+    - name: Copy dif.conf
+      copy: src=files/dir.conf dest=/etc/apache2/mods-enabled/dir.conf
+
+    - name: Copy index file
+      copy: src=files/index.php dest=/var/www/html/index.php
+

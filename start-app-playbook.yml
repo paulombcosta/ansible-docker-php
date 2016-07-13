@@ -1,0 +1,40 @@
+---
+- hosts: all
+  roles: 
+    - docker-provision
+  tasks:
+    - name: Install pip
+      apt: name=python-pip update_cache=yes
+      sudo: yes
+
+    - name: Upgrade pip
+      shell: pip install --upgrade pip
+      sudo: yes
+
+    - name: Install docker-py
+      pip: state=present name=docker-py
+      sudo: yes
+
+    # Builds the docker image inside the host
+    # Normally this wouldn't be necessary as it's common
+    # practice to fetch image data from a registry
+    - name: Copy dockerfiles
+      copy: src=dockerfiles dest=/opt/
+      sudo: yes
+
+    - name: Add execution permission to build-images script
+      shell: chmod +x /opt/dockerfiles/build-images.sh
+      sudo: yes
+
+    - name: Build images
+      shell: cd /opt/dockerfiles/ && ./build-images.sh
+      sudo: yes
+
+    - name: Start the apache-php container
+      docker:
+        name: apache-php
+        state: reloaded
+        image: project/apache-php
+        ports:
+          - "80:80"
+      sudo: yes

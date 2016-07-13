@@ -1,0 +1,47 @@
+---
+  # Installing Docker on a Debian distrubution according to the official docs at:
+  # https://docs.docker.com/engine/installation/linux/debian/
+
+- name: Ensure backports are available
+  copy: src=../files/backports.list dest=/etc/apt/sources.list.d/backports.list
+  sudo: yes
+
+- name: Update package information
+  apt: update_cache=yes
+  sudo: yes
+
+- name: Remove older Docker repositories
+  apt: name={{ item }} purge=yes state=absent
+  with_items:
+    - ['lxc-docker', 'docker.io']
+  sudo: yes
+
+- name: Update package information
+  apt: update_cache=yes
+  sudo: yes
+
+- name: ensure that APT works with the https method, and that CA certificates are installed.
+  apt: name={{ item  }} update_cache=no
+  with_items:
+    - ['apt-transport-https', 'ca-certificates']
+  sudo: yes
+
+- name: Add the new GPG key
+  shell: apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  sudo: yes
+
+- name: Add docker-list file for the Debian OS, in this case "jessie"
+  copy: src=../files/docker.list dest=/etc/apt/sources.list.d/docker.list
+  sudo: yes
+
+- name: Update package information
+  apt: update_cache=yes
+  sudo: yes
+
+- name: Install Docker Engine
+  apt: name=docker-engine update_cache=no
+  sudo: yes
+
+- name: Start the Docker daemon
+  service: name=docker state=started
+  sudo: yes
