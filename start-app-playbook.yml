@@ -5,30 +5,30 @@
   tasks:
     - name: Install pip
       apt: name=python-pip update_cache=yes
-      sudo: yes
+      become: yes
 
     - name: Upgrade pip
       shell: pip install --upgrade pip
-      sudo: yes
+      become: yes
 
     - name: Install docker-py
       pip: state=present name=docker-py
-      sudo: yes
+      become: yes
 
     # Builds the docker image inside the host
     # Normally this wouldn't be necessary as it's common
     # practice to fetch image data from a registry
     - name: Copy dockerfiles
       copy: src=dockerfiles dest=/opt/
-      sudo: yes
+      become: yes
 
     - name: Add execution permission to build-images script
       shell: chmod +x /opt/dockerfiles/build-images.sh
-      sudo: yes
+      become: yes
 
     - name: Build images
       shell: cd /opt/dockerfiles/ && ./build-images.sh
-      sudo: yes
+      become: yes
 
     - name: Start the apache-php container
       docker:
@@ -37,4 +37,4 @@
         image: project/apache-php
         ports:
           - "80:80"
-      sudo: yes
+      become: yes
